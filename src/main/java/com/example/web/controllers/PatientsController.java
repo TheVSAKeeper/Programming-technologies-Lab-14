@@ -1,6 +1,7 @@
 package com.example.web.controllers;
 
 import com.example.web.entities.Patient;
+import com.example.web.dto.PatientFilter;
 import com.example.web.services.PatientsService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class PatientsController
 
         Page<Patient> patients;
 
-        if (pageNumber == null)
+        if (pageNumber == null || pageNumber <= 0)
         {
             pageNumber = 1;
         }
@@ -51,7 +52,8 @@ public class PatientsController
                 gender = null;
             }
 
-            patients = patientsService.getWithSpecification(fullName, maxAge, minAge, gender, paging);
+            PatientFilter filter = new PatientFilter(fullName, maxAge, minAge, gender);
+            patients = patientsService.getWithSpecification(filter, paging);
 
             model.addAttribute("fullName", fullName);
             model.addAttribute("maxAge", maxAge);

@@ -1,5 +1,6 @@
 package com.example.web.services;
 
+import com.example.web.dto.PatientFilter;
 import com.example.web.entities.Patient;
 import com.example.web.repositories.IPatientRepository;
 import com.example.web.repositories.specifications.PatientSpecifications;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.function.Predicate;
+import java.util.Optional;
 
 import static com.example.web.repositories.specifications.PatientSpecifications.*;
 
@@ -42,21 +43,19 @@ public class PatientsService
         return patientRepository.findById(id).orElse(null);
     }
 
-    public Patient getLastUpdated()
+    public Page<Patient> getWithSpecification(PatientFilter filter, Pageable paging)
     {
-        // return patientRepository.findTopByOrderByUpdatedAtDesc(); // -
-        return patientRepository.findTopByUpdatedAtIsNotNullOrderByUpdatedAtDesc(); // +
-        // return patientRepository.findAll()
-        // .stream()
-        // .filter(patient -> patient.getUpdatedAt()!=null)
-        // .sorted((o1, o2) -> o2.getUpdatedAt().compareTo(o1.getUpdatedAt()))
-        // .findFirst()
-        // .orElse(null); // +
+        return getAll(ageGreaterThan(filter.minAge())
+                              .and(ageLessThan(filter.maxAge()))
+                              .and(fullNameContains(filter.fullName()))
+                              .and(PatientSpecifications.genderCorrect(filter.gender())), paging);
     }
 
     public void delete(long id)
     {
-        patientRepository.delete(patientRepository.findById(id).get());
+        Optional<Patient> patient = patientRepository.findById(id);
+
+        patient.ifPresent(value -> patientRepository.delete(value));
     }
 
     public Patient update(Patient patient)
@@ -70,35 +69,16 @@ public class PatientsService
             return null;
         }
 
+        // Если разделять создание и изменение.
+        // При создании id отсутствует.
+        // if (patient.getPatientId() != null)
+        // {
+        //      patient.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
+        // }
+
         patient.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
+
         return patientRepository.save(patient);
-    }
-
-    private static Predicate<Patient> buildPatientFilter(String fullName, Integer maxAge, Integer ageGreaterThan, String gender)
-    {
-        Predicate<Patient> isAgeGreater = patient -> ageGreaterThan == null
-                                                     || patient.getAge() > ageGreaterThan;
-
-        Predicate<Patient> isAgeLess = patient -> maxAge == null
-                                                  || patient.getAge() < maxAge;
-
-        Predicate<Patient> isFullNameContains = patient -> fullName == null
-                                                           || fullName.isBlank()
-                                                           || patient.getFullName().contains(fullName);
-
-        Predicate<Patient> isGenderCorrect = patient -> gender == null
-                                                        || gender.isBlank()
-                                                        || gender.equalsIgnoreCase(patient.getGender());
-
-        return isAgeGreater.and(isAgeLess).and(isFullNameContains).and(isGenderCorrect);
-    }
-
-    public Page<Patient> getWithSpecification(String fullName, Integer maxAge, Integer minAge, String gender, Pageable paging)
-    {
-        return getAll(ageGreaterThan(minAge)
-                              .and(ageLessThan(maxAge))
-                              .and(fullNameContains(fullName))
-                              .and(PatientSpecifications.genderCorrect(gender)), paging);
     }
 
     public Integer getYoungestPatient()
@@ -119,8 +99,18 @@ public class PatientsService
                                 .orElse(0);
     }
 
-    public Page<Patient> findAll(Pageable paging)
+    public Patient getLastUpdated()
     {
-        return patientRepository.findAll(paging);
+        // return patientRepository.findTopByOrderByUpdatedAtDesc(); // -
+
+        return patientRepository.findTopByUpdatedAtIsNotNullOrderByUpdatedAtDesc(); // +
+
+        // return patientRepository.findAll()
+        // .stream()
+        // .filter(patient -> patient.getUpdatedAt()!=null)
+        // .sorted((o1, o2) -> o2.getUpdatedAt().compareTo(o1.getUpdatedAt()))
+        // .findFirst()
+        // .orElse(null); // +
     }
 }
+

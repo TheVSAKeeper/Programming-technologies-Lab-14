@@ -8,7 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 @ComponentScan("com.example.web")
-public class ApplicationConfiguration
+public class ApplicationConfig
 {
     @Bean
     public PasswordEncoder passwordEncoder()
