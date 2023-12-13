@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:sec="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${patient.patientId == null} ? 'Добавление пациента':'Редактирование пациента'"></title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="w3-container">
+
+<div class="w3-bar w3-border w3-light-grey w3-card-4">
+    <a th:href="@{/home}" class="w3-bar-item w3-button"><i class="fa fa-home"></i></a>
+    <span class="w3-bar-item w3-dark-gray">Пациенты</span>
+    <a href="#" class="w3-bar-item w3-button">Опросы</a>
+    <a href="#" class="w3-bar-item w3-button">Диагнозы</a>
+    <a class="w3-bar-item w3-button w3-right w3-red" sec:authorize="isAuthenticated()" th:href="@{/logout}"><i
+            class=" fa fa-sign-out"></i></a>
+    <a class="w3-bar-item w3-button w3-right w3-green" sec:authorize="!isAuthenticated()" th:href="@{/home}"><i
+            class=" fa fa-sign-in"></i></a>
+    <span sec:authorize="isAuthenticated()" class="w3-bar-item w3-right">Пользователь: <span
+            sec:authentication="principal.username"></span></span>
+</div>
+
+<form th:action="@{/patients/add}"
+      th:object="${patient}" method="post" class="w3-container w3-card-4 w3-light-grey w3-margin-top">
+    <h2><span th:text="${patient.patientId == null} ? 'Добавление':'Редактирование'"></span></h2>
+
+    <p th:hidden="${!isShowId}">
+        <label>ID</label>
+        <input th:field="*{patientId}" th:readonly="${isShowId}" class="w3-input w3-border w3-round" name="id"
+               type="number"></p>
+    <p>
+        <label>Фамилия</label>
+        <input th:field="*{lastName}" class="w3-input w3-border w3-round" name="lastname" type="text"></p>
+    <p>
+        <label>Имя</label>
+        <input th:field="*{firstName}" class="w3-input w3-border w3-round" name="firstname" type="text"></p>
+    <p>
+        <label>Отчество</label>
+        <input th:field="*{patronymic}" class="w3-input w3-border w3-round" name="patronymic" type="text"></p>
+    <p>
+        <label>Дата рождения</label>
+        <input th:field="*{birthDate}" class="w3-input w3-border w3-round" name="birthdate" type="date"></p>
+    <p>
+        <label>Пол</label>
+        <select class="w3-select w3-border w3-round" name="gender" th:field="*{gender}">
+            <option value="" disabled selected>Выберите пол</option>
+            <option value="М">М</option>
+            <option value="Ж">Ж</option>
+        </select></p>
+
+    <a th:href="@{/patients}" class="w3-button w3-margin-bottom w3-right w3-margin-left w3-red" type="reset">Отмена</a>
+    <button class="w3-button w3-dark-gray w3-margin-bottom w3-right" type="submit"><span
+            th:text="${patient.patientId == null} ? 'Добавить' : 'Сохранить'"></span>
+    </button>
+
+    <div th:if="${patient.patientId != null}" class="w3-right w3-margin-right">
+        <label>Сохранить как нового пациента</label>
+        <input class="w3-check" type="checkbox" th:name="isNewPatient">
+    </div>
+</form>
+
+</body>
+</html>

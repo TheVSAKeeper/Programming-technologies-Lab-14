@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns="http://www.w3.org/1999/xhtml" xmlns:sec="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Домашняя страница</title>
+    <link href="https://www.w3schools.com/w3css/4/w3.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+</head>
+<body class="w3-container">
+
+<div class="w3-bar w3-border w3-light-grey w3-card-4">
+    <span class="w3-bar-item w3-dark-gray"><i class="fa fa-home"></i></span>
+    <a class="w3-bar-item w3-button" th:href="@{/patients}">Пациенты</a>
+    <a class="w3-bar-item w3-button" href="">Опросы</a>
+    <a class="w3-bar-item w3-button" href="">Диагнозы</a>
+    <a class="w3-bar-item w3-button w3-right w3-red" sec:authorize="isAuthenticated()" th:href="@{/logout}"><i
+            class=" fa fa-sign-out"></i></a>
+    <a class="w3-bar-item w3-button w3-right w3-green" sec:authorize="!isAuthenticated()" th:href="@{/home}"><i
+            class=" fa fa-sign-in"></i></a>
+    <span class="w3-bar-item w3-right" sec:authorize="isAuthenticated()">Пользователь: <span
+            sec:authentication="principal.username"></span></span>
+</div>
+
+<h2 th:if="${param.error}" class="w3-container w3-card-4 w3-red w3-margin-top w3-padding">
+    Неверное имя пользователя или пароль.
+</h2>
+<h2 th:if="${param.denied}" class="w3-container w3-card-4 w3-red w3-margin-top w3-padding">
+    Для доступа необходимо войти.
+</h2>
+<h2 th:if="${param.logout}" class="w3-container w3-card-4 w3-light-grey w3-margin-top w3-padding">
+    Выход успешно выполнен.
+</h2>
+
+<div class="w3-container w3-card-4 w3-light-grey w3-margin-top" sec:authorize="!isAuthenticated()">
+    <h2>Вход</h2>
+    <form method="post" th:action="@{/login}">
+        <p>
+            <label>Имя пользователя</label>
+            <input class="w3-input w3-border w3-round" name="username" placeholder="Имя пользователя" type="text"/>
+        </p>
+        <p>
+            <label>Пароль</label>
+            <input class="w3-input w3-border w3-round" name="password" placeholder="Пароль" type="password"/>
+        </p>
+        <input class="w3-button w3-dark-gray w3-margin-bottom w3-right" type="submit" value="Войти"/>
+    </form>
+</div>
+<div class="w3-container w3-card-4 w3-light-grey w3-margin-top" sec:authorize="isAuthenticated()">
+    <h2>Добро пожаловать, <span sec:authentication="principal.username"></span>!</h2>
+    <p>Имя: <span th:text="${user.firstName}"></span></p>
+    <p>Фамилия: <span th:text="${user.lastName}"></span></p>
+    <p>Отчество: <span th:text="${user.patronymic}"></span></p>
+    <p>Выданные роли: <span th:text="${user.getGrantedRoles()}"></span></p>
+    <a class="w3-button w3-dark-gray w3-margin-bottom w3-right" th:href="@{/logout}">Выйти</a>
+</div>
+</body>
+</html>
